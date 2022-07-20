@@ -1,0 +1,643 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "internal/proto/news.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "ContentCheckService"
+    },
+    {
+      "name": "NewsService"
+    },
+    {
+      "name": "TagService"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/eapi/news/manage/health": {
+      "get": {
+        "summary": "Проверка жизнеспособности сервиса",
+        "operationId": "ContentCheckService_CheckHealth",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/content_v1HealthResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "ContentCheckService"
+        ]
+      }
+    },
+    "/eapi/news/v1/news": {
+      "get": {
+        "summary": "Получение списка новостей",
+        "operationId": "NewsService_GetNews",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/content_v1NewsList"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "offset",
+            "description": "Номер строки, которой начинается выборка",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "limit",
+            "description": "Количество возвращаемых объектов на странице",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "sort",
+            "description": "Поле для сортировки (active_from, date_create)",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "order",
+            "description": "Направление сортировки (desc, asc)",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "query",
+            "description": "Поиск по строке",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "filter.userId",
+            "description": "фильтр по пользователю",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "filter.mode",
+            "description": "фильтр по активности\n  1. не передано - опубликованные и черновики\n  2. active - только опубликованные\n  3. inactive черновики)",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "NewsService"
+        ]
+      },
+      "post": {
+        "summary": "Создание новости",
+        "operationId": "NewsService_Create",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/content_v1BaseResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/content_v1RequestNewsObject"
+            }
+          }
+        ],
+        "tags": [
+          "NewsService"
+        ]
+      }
+    },
+    "/eapi/news/v1/news/file/{id}": {
+      "get": {
+        "summary": "Получить ссылку на файл для скачивания",
+        "operationId": "NewsService_GetFileLink",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/content_v1FileLink"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Идентификатор файла",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "NewsService"
+        ]
+      }
+    },
+    "/eapi/news/v1/news/public/{slug}": {
+      "get": {
+        "summary": "Получение детальной информации по новости для отображения при переходе по письму",
+        "operationId": "NewsService_GetOneBySlug",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/content_v1NewsObject"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "NewsService"
+        ]
+      }
+    },
+    "/eapi/news/v1/news/{id}": {
+      "get": {
+        "summary": "Получение детальной информации по новости",
+        "operationId": "NewsService_GetOne",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/content_v1NewsObject"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "NewsService"
+        ]
+      },
+      "delete": {
+        "summary": "Удаление новости",
+        "operationId": "NewsService_Delete",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/content_v1BaseResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "NewsService"
+        ]
+      },
+      "put": {
+        "summary": "Обновление новости",
+        "operationId": "NewsService_Update",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/content_v1BaseResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Id повости. С фронта НЕ нужно передавать, необходимо для передачи id через url в методе (update)",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "title": "Название"
+                },
+                "active": {
+                  "type": "boolean",
+                  "title": "Активность (true - активна, false - черновик)"
+                },
+                "activeFrom": {
+                  "type": "string",
+                  "format": "int64",
+                  "title": "Дата начала активности"
+                },
+                "text": {
+                  "type": "string",
+                  "title": "Текстовое описание"
+                },
+                "textJson": {
+                  "type": "string",
+                  "title": "Текствое описание (для визуального редактора)"
+                },
+                "tags": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/content_v1Tag"
+                  },
+                  "title": "Список тегов"
+                },
+                "files": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/content_v1File"
+                  },
+                  "title": "Список файлов для прикрепления"
+                },
+                "isImportant": {
+                  "type": "boolean",
+                  "title": "Важное"
+                }
+              },
+              "title": "Объект новости"
+            }
+          }
+        ],
+        "tags": [
+          "NewsService"
+        ]
+      }
+    },
+    "/eapi/news/v1/tag": {
+      "get": {
+        "summary": "Получение тега",
+        "operationId": "TagService_Get",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/content_v1TagList"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "TagService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "content_v1BaseResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "title": "Признак успешности"
+        },
+        "message": {
+          "type": "string",
+          "title": "Сообщение при ошибке"
+        }
+      },
+      "title": "Базовый формат ответа"
+    },
+    "content_v1File": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "id файла"
+        },
+        "name": {
+          "type": "string",
+          "title": "Название"
+        },
+        "ext": {
+          "type": "string",
+          "title": "Расширение"
+        },
+        "base64": {
+          "type": "string",
+          "title": "base64 для файла"
+        },
+        "dateCreate": {
+          "type": "string",
+          "format": "int64",
+          "title": "Дата создания"
+        },
+        "userId": {
+          "type": "string",
+          "title": "id пользователя, создавшего файл"
+        }
+      },
+      "title": "Объект входящего файла"
+    },
+    "content_v1FileLink": {
+      "type": "object",
+      "properties": {
+        "link": {
+          "type": "string",
+          "title": "Ссылка на файл"
+        }
+      },
+      "title": "Объект ссылки на файл"
+    },
+    "content_v1HealthResponse": {
+      "type": "object",
+      "properties": {
+        "serviceName": {
+          "type": "string"
+        },
+        "serviceStatus": {
+          "type": "string"
+        }
+      },
+      "title": "Объект с информацией о работоспособности сервиса"
+    },
+    "content_v1ListRequestFilter": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "title": "фильтр по пользователю"
+        },
+        "mode": {
+          "type": "string",
+          "title": "фильтр по активности\n  1. не передано - опубликованные и черновики\n  2. active - только опубликованные\n  3. inactive черновики)"
+        }
+      },
+      "title": "Параметры фильтрации"
+    },
+    "content_v1NewsList": {
+      "type": "object",
+      "properties": {
+        "news": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/content_v1NewsObject"
+          },
+          "title": "Список элементов"
+        },
+        "total": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Общее количество"
+        }
+      },
+      "title": "Объект списка новостей"
+    },
+    "content_v1NewsObject": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "id повости"
+        },
+        "title": {
+          "type": "string",
+          "title": "Название"
+        },
+        "author": {
+          "type": "string",
+          "title": "Автор"
+        },
+        "active": {
+          "type": "boolean",
+          "title": "Активность (true - активна, false - черновик)"
+        },
+        "activeFrom": {
+          "type": "number",
+          "format": "double",
+          "title": "Дата начала активности"
+        },
+        "text": {
+          "type": "string",
+          "title": "Текстовое описание"
+        },
+        "textJson": {
+          "type": "string",
+          "title": "Текствое описание (для визуального редактора)"
+        },
+        "userId": {
+          "type": "string",
+          "title": "Идентификатор пользователя"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/content_v1Tag"
+          },
+          "title": "Список тегов"
+        },
+        "filesInfo": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/content_v1File"
+          },
+          "title": "Список прикрепленных файлов"
+        },
+        "isImportant": {
+          "type": "boolean",
+          "title": "Важное"
+        }
+      },
+      "title": "Объект новости"
+    },
+    "content_v1RequestNewsObject": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "Id повости. С фронта НЕ нужно передавать, необходимо для передачи id через url в методе (update)"
+        },
+        "title": {
+          "type": "string",
+          "title": "Название"
+        },
+        "active": {
+          "type": "boolean",
+          "title": "Активность (true - активна, false - черновик)"
+        },
+        "activeFrom": {
+          "type": "string",
+          "format": "int64",
+          "title": "Дата начала активности"
+        },
+        "text": {
+          "type": "string",
+          "title": "Текстовое описание"
+        },
+        "textJson": {
+          "type": "string",
+          "title": "Текствое описание (для визуального редактора)"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/content_v1Tag"
+          },
+          "title": "Список тегов"
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/content_v1File"
+          },
+          "title": "Список файлов для прикрепления"
+        },
+        "isImportant": {
+          "type": "boolean",
+          "title": "Важное"
+        }
+      },
+      "title": "Объект новости"
+    },
+    "content_v1Tag": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "id тега"
+        },
+        "name": {
+          "type": "string",
+          "title": "Название"
+        }
+      },
+      "title": "Объект тега"
+    },
+    "content_v1TagList": {
+      "type": "object",
+      "properties": {
+        "tag": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/content_v1Tag"
+          },
+          "title": "Список элементов"
+        }
+      },
+      "title": "Объект списка тегов"
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    }
+  }
+}

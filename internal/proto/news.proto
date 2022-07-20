@@ -1,0 +1,227 @@
+syntax = "proto3";
+
+import "google/api/annotations.proto";
+
+package content_v1;
+
+option go_package = "internal/proto";
+// Базовые методы проверки жизни сервиса
+service ContentCheckService{
+  // Проверка жизнеспособности сервиса
+  rpc CheckHealth(EmptyRequest) returns (HealthResponse) {
+    option (google.api.http) = {
+      get: "/eapi/news/manage/health"
+    };
+  }
+}
+// Объект с информацией о работоспособности сервиса
+message HealthResponse {
+  string serviceName = 1;
+  string serviceStatus = 2;
+}
+
+// Сервис для работы с новостями
+service NewsService {
+  // Получение списка новостей
+  rpc GetNews (NewsRequestParams) returns (NewsList) {
+    option (google.api.http) = {
+      get: "/eapi/news/v1/news"
+    };
+  }
+  // Получение детальной информации по новости
+  rpc GetOne (ObjectId) returns (NewsObject) {
+    option (google.api.http) = {
+      get: "/eapi/news/v1/news/{id}"
+    };
+  }
+  // Получение детальной информации по новости для отображения при переходе по письму
+  rpc GetOneBySlug (ObjectSlug) returns (NewsObject) {
+    option (google.api.http) = {
+      get: "/eapi/news/v1/news/public/{slug}"
+    };
+  }
+  // Создание новости
+  rpc Create (RequestNewsObject) returns (BaseResponse) {
+    option (google.api.http) = {
+      post: "/eapi/news/v1/news"
+      body: "*"
+    };
+  }
+  // Обновление новости
+  rpc Update (RequestNewsObject) returns (BaseResponse) {
+    option (google.api.http) = {
+      put: "/eapi/news/v1/news/{id}"
+      body: "*"
+    };
+  }
+  // Удаление новости
+  rpc Delete (ObjectId) returns (BaseResponse) {
+    option (google.api.http) = {
+      delete: "/eapi/news/v1/news/{id}"
+    };
+  }
+  //Получить ссылку на файл для скачивания
+  rpc GetFileLink(FileId) returns (FileLink) {
+    option (google.api.http) = {
+      get: "/eapi/news/v1/news/file/{id}"
+    };
+  }
+}
+
+
+// Сервис для работы с тегами (в текущей версии только новостей)
+service TagService {
+  // Получение тега
+  rpc Get (EmptyRequest) returns (TagList) {
+    option (google.api.http) = {
+      get: "/eapi/news/v1/tag"
+    };
+  }
+}
+
+// Входные данные для запроса списка новостей
+message NewsRequestParams {
+  // Номер строки, которой начинается выборка
+  int64 offset = 1;
+  // Количество возвращаемых объектов на странице
+  int64 limit = 2;
+  // Поле для сортировки (active_from, date_create)
+  string sort = 3;
+  // Направление сортировки (desc, asc)
+  string order = 4;
+  // Поиск по строке
+  string query = 5;
+  // Параметры фильтрации
+  ListRequestFilter filter = 6; // Объект фильтарции
+}
+
+// Параметры фильтрации
+message ListRequestFilter {
+  // фильтр по пользователю
+  string userId = 1;
+  // фильтр по активности
+  //   1. не передано - опубликованные и черновики
+  //   2. active - только опубликованные
+  //   3. inactive черновики)
+  string mode = 2;
+}
+
+// Базовый формат ответа
+message BaseResponse {
+  // Признак успешности
+  bool success = 1;
+  // Сообщение при ошибке
+  string message = 2;
+}
+
+// Объект списка новостей
+message NewsList {
+  // Список элементов
+  repeated NewsObject news = 1;
+  // Общее количество
+  int32 total = 2;
+}
+
+// Объект новости
+message RequestNewsObject {
+  // Id повости. С фронта НЕ нужно передавать, необходимо для передачи id через url в методе (update)
+  string id = 1;
+  // Название
+  string title = 2;
+  // Активность (true - активна, false - черновик)
+  bool active = 3;
+  // Дата начала активности
+  int64 activeFrom = 4;
+  // Текстовое описание
+  string text = 5;
+  // Текствое описание (для визуального редактора)
+  string textJson = 6;
+  // Список тегов
+  repeated Tag tags = 8;
+  // Список файлов для прикрепления
+  repeated File files = 9;
+  // Важное
+  bool isImportant = 10;
+}
+
+// Объект новости
+message NewsObject {
+  // id повости
+  string id = 1;
+  // Название
+  string title = 2;
+  // Автор
+  string author = 3;
+  // Активность (true - активна, false - черновик)
+  bool active = 4;
+  // Дата начала активности
+  double activeFrom = 5;
+  // Текстовое описание
+  string text = 6;
+  // Текствое описание (для визуального редактора)
+  string textJson = 7;
+  // Идентификатор пользователя
+  string userId = 8;
+  // Список тегов
+  repeated Tag tags = 9;
+  // Список прикрепленных файлов
+  repeated File filesInfo = 10;
+  // Важное
+  bool isImportant = 11;
+}
+
+// Объект тега
+message Tag {
+  // id тега
+  string id = 1;
+  // Название
+  string name = 2;
+}
+
+// Объект списка тегов
+message TagList {
+  // Список элементов
+  repeated Tag tag = 1;
+}
+
+// Пустой запрос (служебный объект)
+message EmptyRequest {
+}
+
+// Объект идентификации записи (служебный объект)
+message ObjectId {
+  string id = 1;
+}
+
+// Объект идентификации записи (служебный объект, для чпу)
+message ObjectSlug {
+  string slug = 1;
+}
+
+// Объект входящего файла
+message File {
+  // id файла
+  string id = 1;
+  // Название
+  string name = 2;
+  // Расширение
+  string ext = 3;
+  // base64 для файла
+  string base64 = 4;
+  // Дата создания
+  int64 dateCreate = 5;
+  // id пользователя, создавшего файл
+  string userId = 6;
+}
+
+// Объект идентификатора файла
+message FileId{
+  //Идентификатор файла
+  string id = 1;
+}
+
+// Объект ссылки на файл
+message FileLink{
+  // Ссылка на файл
+  string link = 1;
+}
