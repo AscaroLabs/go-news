@@ -499,8 +499,8 @@
           "title": "Активность (true - активна, false - черновик)"
         },
         "activeFrom": {
-          "type": "number",
-          "format": "double",
+          "type": "string",
+          "format": "int64",
           "title": "Дата начала активности"
         },
         "text": {

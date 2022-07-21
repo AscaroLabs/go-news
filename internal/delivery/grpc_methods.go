@@ -20,6 +20,7 @@ func (s *contentCheckServiceServer) CheckHealth(ctx context.Context, in *pb.Empt
 	} else {
 		_ = grpc.SetHeader(ctx, metadata.Pairs("x-http-code", "500"))
 		return &pb.HealthResponse{
+			ServiceName:   "ContentCheckService",
 			ServiceStatus: "500",
 		}, nil
 	}
@@ -27,4 +28,5 @@ func (s *contentCheckServiceServer) CheckHealth(ctx context.Context, in *pb.Empt
 
 func service_alive() bool {
 	return (rand.Intn(100) < 50)
+	// return true
 }

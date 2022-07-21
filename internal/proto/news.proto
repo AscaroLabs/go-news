@@ -155,7 +155,7 @@ message NewsObject {
   // Активность (true - активна, false - черновик)
   bool active = 4;
   // Дата начала активности
-  double activeFrom = 5;
+  int64 activeFrom = 5;
   // Текстовое описание
   string text = 6;
   // Текствое описание (для визуального редактора)
