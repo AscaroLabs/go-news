@@ -2,40 +2,41 @@
 package app
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"net"
-	"net/http"
 
-	pb "github.com/AscaroLabs/go-news/internal/proto"
-	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-
+	"github.com/AscaroLabs/go-news/internal/auth"
 	"github.com/AscaroLabs/go-news/internal/config"
 	"github.com/AscaroLabs/go-news/internal/delivery"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
 type App struct {
 	cfg         *config.Config
-	mux         *runtime.ServeMux
-	grpc_server *grpc.Server
+	restServer  *delivery.RESTServer
+	grpcServer  *grpc.Server
+	authService *auth.AuthSerivce
 }
 
 func NewApp(cfg *config.Config) (*App, error) {
-	mux, err := delivery.NewWrapperMux(cfg)
+	restServer, err := delivery.NewRESTServer(cfg)
 	if err != nil {
-		log.Fatalf("[REST] Can't create new mux: %v", err)
+		log.Fatalf("[REST] Can't create new REST server: %v", err)
 	}
-	grpc_server, err := delivery.NewGRPCServer(cfg)
+	grpcServer, err := delivery.NewGRPCServer(cfg)
 	if err != nil {
 		log.Fatalf("[gRPC] Can't create new gRPC server: %v", err)
 	}
+	authService, err := auth.NewAuthService(cfg)
+	if err != nil {
+		log.Fatalf("[Auth] Can't create new Auth service: %v", err)
+	}
 	return &App{
 		cfg:         cfg,
-		mux:         mux,
-		grpc_server: grpc_server,
+		restServer:  restServer,
+		grpcServer:  grpcServer,
+		authService: authService,
 	}, nil
 }
 
@@ -46,22 +47,7 @@ func (application *App) Run() {
 			application.cfg.GetRESTHost(),
 			application.cfg.GetRESTPort(),
 		)
-		ctx := context.Background()
-		ctx, cancel := context.WithCancel(ctx)
-		defer cancel()
-		opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
-		pb.RegisterContentCheckServiceHandlerFromEndpoint(
-			ctx,
-			application.mux,
-			fmt.Sprintf("%s:%s", application.cfg.GetGRPCHost(), application.cfg.GetGRPCPort()),
-			opts,
-		)
-		if err := http.ListenAndServe(
-			fmt.Sprintf(":%s", application.cfg.GetRESTPort()),
-			application.mux,
-		); err != nil {
-			log.Fatalf("[REST] Can't start REST API server: %v", err)
-		}
+		application.restServer.Run(application.cfg)
 	}()
 	go func() {
 		lis, err := net.Listen(
@@ -72,7 +58,7 @@ func (application *App) Run() {
 			log.Fatalf("[gRPC] Failed to listen: %v", err)
 		}
 		log.Printf("[gRPC] Server listening at %v", lis.Addr())
-		if err := application.grpc_server.Serve(lis); err != nil {
+		if err := application.grpcServer.Serve(lis); err != nil {
 			log.Fatalf("[gRPC] Failed to serve: %v", err)
 		}
 	}()
