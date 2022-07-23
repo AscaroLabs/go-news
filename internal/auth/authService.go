@@ -7,22 +7,12 @@ import (
 )
 
 type AuthSerivce struct {
-	tokenManager          *TokenManager
-	registgationService   *RegistgationService
-	authenticationService *AuthenticationService
-	authorizationService  *AuthorizationService
+	tokenManager         *TokenManager
+	authorizationService *AuthorizationService
 }
 
 func NewAuthService(cfg *config.Config) (*AuthSerivce, error) {
 	tokenManager, err := NewTokenManager(cfg)
-	if err != nil {
-		log.Fatalf("Can't create AuthService: %v", err)
-	}
-	registgationService, err := NewRegistgationService(cfg)
-	if err != nil {
-		log.Fatalf("Can't create AuthService: %v", err)
-	}
-	authenticationService, err := NewAuthenticationService(cfg)
 	if err != nil {
 		log.Fatalf("Can't create AuthService: %v", err)
 	}
@@ -31,9 +21,7 @@ func NewAuthService(cfg *config.Config) (*AuthSerivce, error) {
 		log.Fatalf("Can't create AuthService: %v", err)
 	}
 	return &AuthSerivce{
-		tokenManager:          tokenManager,
-		registgationService:   registgationService,
-		authenticationService: authenticationService,
-		authorizationService:  authorizationService,
+		tokenManager:         tokenManager,
+		authorizationService: authorizationService,
 	}, nil
 }

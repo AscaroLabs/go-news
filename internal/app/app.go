@@ -12,15 +12,19 @@ import (
 	"google.golang.org/grpc"
 )
 
+// Структура отвечающая за все приложение
 type App struct {
-	cfg         *config.Config
-	restServer  *delivery.RESTServer
-	grpcServer  *grpc.Server
-	authService *auth.AuthSerivce
+	cfg        *config.Config
+	restServer *delivery.RESTServer
+	grpcServer *grpc.Server
 }
 
 func NewApp(cfg *config.Config) (*App, error) {
-	restServer, err := delivery.NewRESTServer(cfg)
+	tm, err := auth.NewTokenManager(cfg)
+	if err != nil {
+		log.Fatalf("[Auth] Can't create new token manager: %v", err)
+	}
+	restServer, err := delivery.NewRESTServer(cfg, tm)
 	if err != nil {
 		log.Fatalf("[REST] Can't create new REST server: %v", err)
 	}
@@ -28,18 +32,14 @@ func NewApp(cfg *config.Config) (*App, error) {
 	if err != nil {
 		log.Fatalf("[gRPC] Can't create new gRPC server: %v", err)
 	}
-	authService, err := auth.NewAuthService(cfg)
-	if err != nil {
-		log.Fatalf("[Auth] Can't create new Auth service: %v", err)
-	}
 	return &App{
-		cfg:         cfg,
-		restServer:  restServer,
-		grpcServer:  grpcServer,
-		authService: authService,
+		cfg:        cfg,
+		restServer: restServer,
+		grpcServer: grpcServer,
 	}, nil
 }
 
+// в отдельных горутинах запускаем gRPC сервер и REST шлюз
 func (application *App) Run() {
 	go func() {
 		log.Printf(

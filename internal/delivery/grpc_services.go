@@ -18,6 +18,7 @@ type tagServiceServer struct {
 	pb.UnimplementedTagServiceServer
 }
 
+// функция создает новый gRPC сервер
 func NewGRPCServer(cfg *config.Config) (*grpc.Server, error) {
 	grpc_server := grpc.NewServer()
 	pb.RegisterContentCheckServiceServer(grpc_server, &contentCheckServiceServer{})

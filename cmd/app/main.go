@@ -10,6 +10,8 @@ import (
 )
 
 func main() {
+
+	// функция, которая вызовется при получении приложением сигнала об остановке
 	closer.Bind(func() {
 		log.Print("Stop running...")
 	})
@@ -19,5 +21,6 @@ func main() {
 		log.Fatalf("Can't create new app.App object: %v", err)
 	}
 	go application.Run()
+	// ждем в основной горутине сигнал
 	closer.Hold()
 }
