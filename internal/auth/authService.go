@@ -7,8 +7,7 @@ import (
 )
 
 type AuthSerivce struct {
-	tokenManager         *TokenManager
-	authorizationService *AuthorizationService
+	tokenManager *TokenManager
 }
 
 func NewAuthService(cfg *config.Config) (*AuthSerivce, error) {
@@ -16,12 +15,7 @@ func NewAuthService(cfg *config.Config) (*AuthSerivce, error) {
 	if err != nil {
 		log.Fatalf("Can't create AuthService: %v", err)
 	}
-	authorizationService, err := NewAuthorizationService(cfg)
-	if err != nil {
-		log.Fatalf("Can't create AuthService: %v", err)
-	}
 	return &AuthSerivce{
-		tokenManager:         tokenManager,
-		authorizationService: authorizationService,
+		tokenManager: tokenManager,
 	}, nil
 }

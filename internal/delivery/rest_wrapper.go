@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/AscaroLabs/go-news/internal/auth"
 	"github.com/AscaroLabs/go-news/internal/config"
@@ -62,7 +63,7 @@ func (restServer *RESTServer) Run(cfg *config.Config) error {
 func NewWrapperMux(cfg *config.Config, tm *auth.TokenManager) (*runtime.ServeMux, error) {
 	mux := runtime.NewServeMux(
 		runtime.WithForwardResponseOption(httpResponseStatusCodeModifier),
-		runtime.WithIncomingHeaderMatcher(CustomMatcher),
+		// runtime.WithIncomingHeaderMatcher(CustomMatcher),
 	)
 	mux.HandlePath("POST", "/signup", func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
 		var userDTO storage.UserDTO
@@ -70,18 +71,62 @@ func NewWrapperMux(cfg *config.Config, tm *auth.TokenManager) (*runtime.ServeMux
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(fmt.Sprintf("Can't read request body: %v", err)))
+			return
 		}
 		err = json.Unmarshal(userDTO_json, &userDTO)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(fmt.Sprintf("Can't unmarshal body: %v", err)))
+			return
 		}
 		tokens, err := auth.RegisterUser(cfg, tm, &userDTO)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(fmt.Sprintf("Can't register user: %v", err)))
+			return
 		}
 		tokensJSON, _ := json.Marshal(tokens)
+		refresh_ttl, _ := time.ParseDuration(cfg.GetRefreshTTL())
+		refreshCookie := &http.Cookie{
+			Name:     "refresh_token",
+			Value:    tokens.RefreshToken,
+			MaxAge:   int(refresh_ttl.Seconds()),
+			HttpOnly: true,
+		}
+		http.SetCookie(w, refreshCookie)
+		w.Write(tokensJSON)
+	})
+	mux.HandlePath("GET", "/signin", func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
+		email, password, ok := r.BasicAuth()
+		if !ok {
+
+			log.Printf("basic auth went wrong!")
+
+			// Я в шоке, если эти две штуки поменять местами, то все сломается
+			w.Header().Set("WWW-Authenticate", "Basic")
+			w.WriteHeader(http.StatusUnauthorized)
+
+			w.Write([]byte("Auth went wrong!"))
+			return
+		}
+		tokens, err := auth.SignIn(cfg, tm, &storage.SignInDTO{
+			Email:    email,
+			Password: password,
+		})
+		if err != nil {
+			w.Header().Set("WWW-Authenticate", "Basic")
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte(fmt.Sprintf("Auth went wrong: %v", err)))
+			return
+		}
+		tokensJSON, _ := json.Marshal(tokens)
+		refresh_ttl, _ := time.ParseDuration(cfg.GetRefreshTTL())
+		refreshCookie := &http.Cookie{
+			Name:   "refresh_token",
+			Value:  tokens.RefreshToken,
+			MaxAge: int(refresh_ttl.Seconds()),
+		}
+		http.SetCookie(w, refreshCookie)
 		w.Write(tokensJSON)
 	})
 	return mux, nil

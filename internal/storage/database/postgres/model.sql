@@ -10,10 +10,17 @@ create table Users (
     email text not null,
     passwordHash text not null,
     role text not null,
-    registeredFrom text not null,
-    refreshToken text,
-    refreshTokenExpired int,
+    registeredFrom integer not null,
     unique(email)
+);
+
+create table RefreshSessions (
+    id serial primary key,
+    userId text references Users(id),
+    refreshToken text not null,
+    expiresIn integer not null,
+    createdAt integer not null,
+    unique(refreshToken)
 );
 
 create table News (

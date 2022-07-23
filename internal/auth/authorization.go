@@ -9,6 +9,34 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+func SignIn(cfg *config.Config, tm *TokenManager, signInDTO *storage.SignInDTO) (*Tokens, error) {
+
+	log.Printf("let's sign in (email %s)\n", signInDTO.Email)
+
+	userDTO, err := storage.GetUserDTObyEmail(cfg, signInDTO.Email)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Printf("nice, now we have userDTO for %s\n", userDTO.Name)
+
+	ok := doPasswordsMatch(userDTO.Password, signInDTO.Password)
+
+	log.Printf("password check: %v\n", ok)
+
+	if !ok {
+		return nil, err
+	}
+	tokens, err := tm.GenerateTokensFromUserDTO(userDTO)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Printf("we have tokens now\n")
+
+	return tokens, nil
+}
+
 // регистрируем нового пользователя
 func RegisterUser(cfg *config.Config, tm *TokenManager, userDTO *storage.UserDTO) (*Tokens, error) {
 

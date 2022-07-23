@@ -66,8 +66,49 @@ func MakeRegistrationTxn(cfg *config.Config, userDTO UserDTO) error {
 		userDTO.Email,
 		userDTO.Password,
 		userDTO.Role,
-		fmt.Sprintf("%d", time.Now().Unix()),
+		time.Now().Unix(),
 	)
+	if err != nil {
+		return err
+	}
+
+	err = tx.Commit(context.Background())
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func MakeNewSession(cfg *config.Config, userId string, refreshToken string) error {
+	pool, err := pgxpool.Connect(context.Background(), getUrl(cfg))
+	if err != nil {
+		return err
+	}
+	defer pool.Close()
+	tx, err := pool.Begin(context.Background())
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(context.Background())
+
+	q := `
+		insert into RefreshSessions (userId,refreshToken,expiresIn,createdAt) 
+		values ($1,$2,$3,$4)
+	`
+
+	createdAt := time.Now()
+	refresh_ttl, _ := time.ParseDuration(cfg.GetRefreshTTL())
+
+	_, err = tx.Exec(
+		context.Background(),
+		q,
+		userId,
+		refreshToken,
+		createdAt.Add(refresh_ttl).Unix(),
+		createdAt.Unix(),
+	)
+
 	if err != nil {
 		return err
 	}

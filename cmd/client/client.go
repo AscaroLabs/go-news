@@ -33,7 +33,7 @@ func main() {
 
 	// log.Printf("access %s\n refresh %s\n", tokens.AccessToken, tokens.RefreshToken)
 
-	signin_tokens, err := auth.SignIn(cfg, tm, storage.SignInDTO{
+	signin_tokens, err := auth.SignIn(cfg, tm, &storage.SignInDTO{
 		Email:    "ad@.ru",
 		Password: "qweasdzxc123123",
 	})

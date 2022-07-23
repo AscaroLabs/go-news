@@ -8,6 +8,7 @@ import (
 	"github.com/AscaroLabs/go-news/internal/config"
 	"github.com/AscaroLabs/go-news/internal/storage"
 	jwt "github.com/golang-jwt/jwt/v4"
+	"github.com/google/uuid"
 )
 
 type TokenManager struct {
@@ -36,9 +37,17 @@ func (tm *TokenManager) GenerateTokens(tknDTO *storage.TokenDTO) (*Tokens, error
 	if err != nil {
 		return nil, err
 	}
+
+	refreshToken := uuid.NewString()
+
+	err = storage.MakeNewSession(tm.cfg, tknDTO.UserId, refreshToken)
+	if err != nil {
+		return nil, err
+	}
+
 	return &Tokens{
 		AccessToken:  token,
-		RefreshToken: "refreshTokenExample",
+		RefreshToken: refreshToken,
 	}, nil
 }
 

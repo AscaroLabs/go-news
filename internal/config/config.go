@@ -20,6 +20,7 @@ type Config struct {
 	main_dir    string
 	jwt_secret  string
 	jwt_ttl     string
+	refresh_ttl string
 }
 
 func NewConfig() *Config {
@@ -40,7 +41,12 @@ func NewConfig() *Config {
 		main_dir:    os.Getenv("MAIN_DIR"),
 		jwt_secret:  os.Getenv("JWT_SECRET"),
 		jwt_ttl:     os.Getenv("JWT_TTL"),
+		refresh_ttl: os.Getenv("REFRESH_TTL"),
 	}
+}
+
+func (cfg *Config) GetRefreshTTL() string {
+	return cfg.refresh_ttl
 }
 
 func (cfg *Config) GetJWTSecret() string {
