@@ -6,18 +6,6 @@ import (
 	"google.golang.org/grpc"
 )
 
-type contentCheckServiceServer struct {
-	pb.UnimplementedContentCheckServiceServer
-}
-
-type newsServiceServer struct {
-	pb.UnimplementedNewsServiceServer
-}
-
-type tagServiceServer struct {
-	pb.UnimplementedTagServiceServer
-}
-
 // функция создает новый gRPC сервер
 func NewGRPCServer(cfg *config.Config) (*grpc.Server, error) {
 	grpc_server := grpc.NewServer()

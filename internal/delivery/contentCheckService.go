@@ -10,6 +10,10 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
+type contentCheckServiceServer struct {
+	pb.UnimplementedContentCheckServiceServer
+}
+
 func (s *contentCheckServiceServer) CheckHealth(ctx context.Context, in *pb.EmptyRequest) (*pb.HealthResponse, error) {
 	if service_alive() {
 		_ = grpc.SetHeader(ctx, metadata.Pairs("x-http-code", "200"))

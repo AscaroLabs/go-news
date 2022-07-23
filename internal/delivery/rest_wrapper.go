@@ -21,8 +21,7 @@ import (
 )
 
 type RESTServer struct {
-	mux         *runtime.ServeMux
-	authService *auth.AuthSerivce
+	mux *runtime.ServeMux
 }
 
 func NewRESTServer(cfg *config.Config, tm *auth.TokenManager) (*RESTServer, error) {
@@ -30,13 +29,8 @@ func NewRESTServer(cfg *config.Config, tm *auth.TokenManager) (*RESTServer, erro
 	if err != nil {
 		return nil, err
 	}
-	authService, err := auth.NewAuthService(cfg)
-	if err != nil {
-		return nil, err
-	}
 	return &RESTServer{
-		mux:         mux,
-		authService: authService,
+		mux: mux,
 	}, nil
 }
 
