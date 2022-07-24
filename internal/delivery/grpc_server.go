@@ -10,7 +10,7 @@ import (
 func NewGRPCServer(cfg *config.Config) (*grpc.Server, error) {
 	grpc_server := grpc.NewServer()
 	pb.RegisterContentCheckServiceServer(grpc_server, &contentCheckServiceServer{})
-	pb.RegisterNewsServiceServer(grpc_server, &newsServiceServer{})
+	pb.RegisterNewsServiceServer(grpc_server, &newsServiceServer{cfg: cfg})
 	pb.RegisterTagServiceServer(grpc_server, &tagServiceServer{})
 	return grpc_server, nil
 }

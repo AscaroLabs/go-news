@@ -1,6 +1,7 @@
 package config
 
 import (
+	"context"
 	"log"
 	"os"
 
@@ -43,6 +44,19 @@ func NewConfig() *Config {
 		jwt_ttl:     os.Getenv("JWT_TTL"),
 		refresh_ttl: os.Getenv("REFRESH_TTL"),
 	}
+}
+
+type key int
+
+const configKey key = 0
+
+func NewContext(ctx context.Context, cfg *Config) context.Context {
+	return context.WithValue(ctx, configKey, cfg)
+}
+
+func FromContext(ctx context.Context) (*Config, bool) {
+	cfg, ok := ctx.Value(configKey).(*Config)
+	return cfg, ok
 }
 
 func (cfg *Config) GetRefreshTTL() string {

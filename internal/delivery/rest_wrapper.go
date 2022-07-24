@@ -39,6 +39,12 @@ func (restServer *RESTServer) Run(cfg *config.Config) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
+	pb.RegisterNewsServiceHandlerFromEndpoint(
+		ctx,
+		restServer.mux,
+		fmt.Sprintf("%s:%s", cfg.GetGRPCHost(), cfg.GetGRPCPort()),
+		opts,
+	)
 	pb.RegisterContentCheckServiceHandlerFromEndpoint(
 		ctx,
 		restServer.mux,
@@ -56,8 +62,16 @@ func (restServer *RESTServer) Run(cfg *config.Config) error {
 
 func NewWrapperMux(cfg *config.Config, tm *auth.TokenManager) (*runtime.ServeMux, error) {
 	mux := runtime.NewServeMux(
+		// runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{
+		// 	MarshalOptions: protojson.MarshalOptions{
+		// 		UseProtoNames: true,
+		// 	},
+		// 	UnmarshalOptions: protojson.UnmarshalOptions{
+		// 		DiscardUnknown: true,
+		// 	},
+		// }),
 		runtime.WithForwardResponseOption(httpResponseStatusCodeModifier),
-		// runtime.WithIncomingHeaderMatcher(CustomMatcher),
+		runtime.WithIncomingHeaderMatcher(CustomMatcher),
 	)
 	mux.HandlePath("POST", "/signup", func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
 		var userDTO storage.UserDTO
