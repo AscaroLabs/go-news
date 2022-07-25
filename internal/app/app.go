@@ -28,7 +28,7 @@ func NewApp(cfg *config.Config) (*App, error) {
 	if err != nil {
 		log.Fatalf("[REST] Can't create new REST server: %v", err)
 	}
-	grpcServer, err := delivery.NewGRPCServer(cfg)
+	grpcServer, err := delivery.NewGRPCServer(cfg, tm)
 	if err != nil {
 		log.Fatalf("[gRPC] Can't create new gRPC server: %v", err)
 	}

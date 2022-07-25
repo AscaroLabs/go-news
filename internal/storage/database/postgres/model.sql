@@ -63,7 +63,7 @@ create table Files (
 -- );
 
 insert into Users (id,name,email,passwordHash,role,registeredFrom) values 
-('1','ilya','qwe@qwe.ru','qqq111','admin',123),
+('1','ilya','qwe@qwe.ru','qqq111','dealer',123),
 ('2','vova','email@qq.q','pas22','member',251),
 ('3','pipka','qwe,,v@a','qwe2222','moder',5555),
 ('4','pupa','rr@email.z','xhvi323-s','guest',222);

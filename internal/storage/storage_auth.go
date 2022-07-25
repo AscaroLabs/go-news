@@ -109,9 +109,9 @@ func GetTokenDTOFromUserDTO(cfg *config.Config, userDTO *UserDTO) (*TokenDTO, er
 
 	err = pool.QueryRow(
 		context.Background(),
-		"select id, role from Users where email=$1",
+		"select id,name,role from Users where email=$1",
 		userDTO.Email,
-	).Scan(&tokenDTO.UserId, &tokenDTO.Role)
+	).Scan(&tokenDTO.UserId, &tokenDTO.Name, &tokenDTO.Role)
 	if err != nil {
 		return nil, err
 	}

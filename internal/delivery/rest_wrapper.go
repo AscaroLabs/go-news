@@ -62,14 +62,6 @@ func (restServer *RESTServer) Run(cfg *config.Config) error {
 
 func NewWrapperMux(cfg *config.Config, tm *auth.TokenManager) (*runtime.ServeMux, error) {
 	mux := runtime.NewServeMux(
-		// runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{
-		// 	MarshalOptions: protojson.MarshalOptions{
-		// 		UseProtoNames: true,
-		// 	},
-		// 	UnmarshalOptions: protojson.UnmarshalOptions{
-		// 		DiscardUnknown: true,
-		// 	},
-		// }),
 		runtime.WithForwardResponseOption(httpResponseStatusCodeModifier),
 		runtime.WithIncomingHeaderMatcher(CustomMatcher),
 	)
@@ -162,7 +154,16 @@ func httpResponseStatusCodeModifier(ctx context.Context, w http.ResponseWriter, 
 		}
 		delete(md.HeaderMD, "x-http-code")
 		delete(w.Header(), "Grpc-Metadata-X-Http-Code")
-		w.WriteHeader(code)
+
+		switch code {
+		case 401:
+			w.Header().Set("WWW-Authenticate", "Bearer")
+			w.WriteHeader(http.StatusUnauthorized)
+			return nil
+		default:
+			w.WriteHeader(code)
+		}
+
 	}
 	return nil
 }

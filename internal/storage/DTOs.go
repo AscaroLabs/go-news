@@ -9,6 +9,7 @@ type UserDTO struct {
 
 type TokenDTO struct {
 	UserId string
+	Name   string
 	Role   string
 }
 
